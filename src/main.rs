@@ -1,3 +1,7 @@
+extern crate pewpew;
+
+use pewpew::engine;
+
 fn main() {
-    println!("Hello, rust!");
+    engine::graphics::open_window();
 }
