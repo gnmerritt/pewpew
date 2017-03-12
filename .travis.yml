@@ -10,8 +10,7 @@ before_install:
   - sudo add-apt-repository --yes ppa:kubuntu-ppa/backports
   - sudo apt-get update -qq
 install:
-  - sudo apt-get install cmake
-  - sudo apt-get install libXxf86vm-dev
+  - sudo apt-get install cmake libXxf86vm-dev libsdl2-dev
 script:
   - cargo build
   - cargo test
