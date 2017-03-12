@@ -8,14 +8,15 @@ matrix:
 before_install:
   # This ppa provides cmake 2.8.12, which travis doesn't have yet
   - sudo add-apt-repository --yes ppa:kubuntu-ppa/backports
+  # This one provides libsdl2-dev
+  - sudo add-apt-repository -y ppa:team-xbmc/ppa
   - sudo apt-get update -qq
 addons:
   apt:
     packages:
     - libXxf86vm-dev
-    - libsdl2-dev
 install:
-  - sudo apt-get install cmake
+  - sudo apt-get install cmake libsdl2-dev
 script:
   - cargo build
   - cargo test
