@@ -1,6 +1,7 @@
-extern crate pewpew;
+extern crate nalgebra;
+extern crate nphysics3d;
 
-use pewpew::engine;
+pub mod engine;
 
 fn main() {
     engine::graphics::open_window();
