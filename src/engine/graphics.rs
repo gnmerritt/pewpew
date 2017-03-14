@@ -30,22 +30,22 @@ const CLEAR_COLOR: [f32; 4] = [0.1, 0.2, 0.3, 1.0];
 
 pub fn open_window() {
     let builder = glutin::WindowBuilder::new()
-          .with_title("Triangle example".to_string())
-          .with_dimensions(1024, 768)
-          .with_vsync();
-      let (window, mut device, mut factory, main_color, mut main_depth) =
-          gfx_window_glutin::init::<ColorFormat, DepthFormat>(builder);
-      let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
-      let pso = factory.create_pipeline_simple(
-          include_bytes!("shader/triangle_150.glslv"),
-          include_bytes!("shader/triangle_150.glslf"),
-          pipe::new()
-      ).unwrap();
-      let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&TRIANGLE, ());
-      let mut data = pipe::Data {
-          vbuf: vertex_buffer,
-          out: main_color
-      };
+        .with_title("Triangle example".to_string())
+        .with_dimensions(1024, 768)
+        .with_vsync();
+    let (window, mut device, mut factory, main_color, mut main_depth) =
+        gfx_window_glutin::init::<ColorFormat, DepthFormat>(builder);
+    let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
+    let pso = factory.create_pipeline_simple(
+        include_bytes!("shader/triangle_150.glslv"),
+        include_bytes!("shader/triangle_150.glslf"),
+        pipe::new()
+    ).unwrap();
+    let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&TRIANGLE, ());
+    let mut data = pipe::Data {
+        vbuf: vertex_buffer,
+        out: main_color
+    };
 
     'main: loop {
         for event in window.poll_events() {
