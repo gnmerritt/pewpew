@@ -8,9 +8,11 @@ readme = "README.md"
 license = "MIT"
 
 [dependencies]
-sdl2 = "0.29"
+gfx = "0.14.1"
+gfx_window_sdl = "0.5.0"
 nalgebra = "0.11.0"
 nphysics3d = "0.6.0"
+sdl2 = "0.28.0"
 
 [target.'cfg(target_os = "emscripten")'.dependencies]
 emscripten-sys = "0.1.0"
