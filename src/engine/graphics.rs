@@ -1,34 +1,68 @@
-extern crate sdl2;
+use gfx;
+use gfx_window_glutin;
+use glutin;
 
-use self::sdl2::event::Event;
-use self::sdl2::keyboard::Keycode;
+use gfx::traits::FactoryExt;
+use gfx::Device;
+
+pub type ColorFormat = gfx::format::Rgba8;
+pub type DepthFormat = gfx::format::DepthStencil;
+
+gfx_defines!{
+    vertex Vertex {
+        pos: [f32; 2] = "a_Pos",
+        color: [f32; 3] = "a_Color",
+    }
+
+    pipeline pipe {
+        vbuf: gfx::VertexBuffer<Vertex> = (),
+        out: gfx::RenderTarget<ColorFormat> = "Target0",
+    }
+}
+
+const TRIANGLE: [Vertex; 3] = [
+    Vertex { pos: [ -0.5, -0.5 ], color: [1.0, 0.0, 0.0] },
+    Vertex { pos: [  0.5, -0.5 ], color: [0.0, 1.0, 0.0] },
+    Vertex { pos: [  0.0,  0.5 ], color: [0.0, 0.0, 1.0] }
+];
+
+const CLEAR_COLOR: [f32; 4] = [0.1, 0.2, 0.3, 1.0];
 
 pub fn open_window() {
-    let sdl_context = self::sdl2::init().unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
+    let builder = glutin::WindowBuilder::new()
+          .with_title("Triangle example".to_string())
+          .with_dimensions(1024, 768)
+          .with_vsync();
+      let (window, mut device, mut factory, main_color, mut main_depth) =
+          gfx_window_glutin::init::<ColorFormat, DepthFormat>(builder);
+      let mut encoder: gfx::Encoder<_, _> = factory.create_command_buffer().into();
+      let pso = factory.create_pipeline_simple(
+          include_bytes!("shader/triangle_150.glslv"),
+          include_bytes!("shader/triangle_150.glslf"),
+          pipe::new()
+      ).unwrap();
+      let (vertex_buffer, slice) = factory.create_vertex_buffer_with_slice(&TRIANGLE, ());
+      let mut data = pipe::Data {
+          vbuf: vertex_buffer,
+          out: main_color
+      };
 
-    let window = video_subsystem.window("SDL2", 800, 640)
-        .position_centered().build().unwrap();
-
-    let mut renderer = window.renderer()
-        .accelerated().build().unwrap();
-
-    renderer.set_draw_color(sdl2::pixels::Color::RGBA(1, 0, 0, 255));
-
-    let mut event_pump = sdl_context.event_pump().unwrap();
-
-    let mut running = true;
-    while running {
-        for event in event_pump.poll_iter() {
-           match event {
-               Event::Quit {..} | Event::KeyDown {keycode: Some(Keycode::Escape), ..} => {
-                   running = false;
-               },
-               _ => {}
-           }
-       }
-
-       renderer.clear();
-       renderer.present();
+    'main: loop {
+        for event in window.poll_events() {
+            match event {
+                glutin::Event::KeyboardInput(_, _, Some(glutin::VirtualKeyCode::Escape)) |
+                glutin::Event::Closed => break 'main,
+                glutin::Event::Resized(_width, _height) => {
+                    gfx_window_glutin::update_views(&window, &mut data.out, &mut main_depth);
+                },
+                _ => {},
+            }
+        }
+        // draw a frame
+        encoder.clear(&data.out, CLEAR_COLOR);
+        encoder.draw(&slice, &pso, &data);
+        encoder.flush(&mut device);
+        window.swap_buffers().unwrap();
+        device.cleanup();
     }
 }
