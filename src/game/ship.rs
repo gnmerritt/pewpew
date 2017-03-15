@@ -2,9 +2,9 @@ use na::{Vector3, Rotation3};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 struct Ship {
-    position: Vector3<i32>,
-    orientation: Rotation3<i32>,
-    velocity: Vector3<i32>,
+    position: Vector3<f32>,
+    orientation: Rotation3<f32>,
+    velocity: Vector3<f32>,
 }
 
 #[cfg(test)]
@@ -16,9 +16,9 @@ mod test {
     #[test]
     fn serialization() {
         let ship = Ship {
-            position: Vector3::new(0, 0, 0),
+            position: Vector3::new(0.0, 1.0, 0.0),
             orientation: Rotation3::identity(),
-            velocity: Vector3::new(1, 0, 0),
+            velocity: Vector3::new(1.0, 0.0, 0.0),
         };
         let encoded: Vec<u8> = serialize(&ship, SizeLimit::Infinite).unwrap();
 
