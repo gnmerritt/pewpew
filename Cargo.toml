@@ -12,11 +12,20 @@ name = "pewpew"
 path = "src/lib.rs"
 
 [dependencies]
+bincode = "1.0.0-alpha5"
 gfx = "0.14.1"
 gfx_window_glutin = "0.14.0"
 glutin = "0.7.4"
-nalgebra = "0.11.0"
 nphysics3d = "0.6.0"
+serde = "0.9.11"
+serde_derive = "0.9.11"
+
+[dependencies.nalgebra]
+version = "0.11.0"
+features = ["serde-serialize"]
+
+[dev-dependencies]
+serde_test = "0.9.11"
 
 [target.'cfg(target_os = "emscripten")'.dependencies]
 emscripten-sys = "0.1.0"
