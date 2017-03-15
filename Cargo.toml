@@ -7,6 +7,10 @@ repository = "https://github.com/gnmerritt/pewpew"
 readme = "README.md"
 license = "MIT"
 
+[lib]
+name = "pewpew"
+path = "src/lib.rs"
+
 [dependencies]
 gfx = "0.14.1"
 gfx_window_glutin = "0.14.0"
