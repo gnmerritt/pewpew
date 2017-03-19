@@ -1,3 +1,7 @@
+extern crate pewpew;
+use pewpew::engine::networking::Server;
+
 fn main() {
-    println!("Hello, server");
+    let mut server = Server::listen();
+    server.accept_connections();
 }
