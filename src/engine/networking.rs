@@ -66,12 +66,20 @@ mod test {
         });
 
         // Client code:
-        // connect
+
+        let mut client = connect();
+        client = verify_echo(client, "some characters to send in");
+
+        let mut client2 = connect();
+        verify_echo(client2, "test string to client 2");
+
+        verify_echo(client, "more things on client one");
+    }
+
+    fn connect() -> TcpStream {
         let mut client = TcpStream::connect("127.0.0.1:8888").unwrap();
         client.set_read_timeout(Some(Duration::from_secs(1))).expect("setting read timeout failed");
-
-        client = verify_echo(client, "some characters to send in");
-        verify_echo(client, "more things");
+        client
     }
 
     fn verify_echo(mut client: TcpStream, test_str: &str) -> TcpStream {
