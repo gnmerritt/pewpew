@@ -18,7 +18,7 @@ impl Message {
         }
     }
 
-    pub fn read(&mut self, new_bytes: &[u8]) -> Option<Vec<u8>> {
+    pub fn read<'a, 'b>(&'a mut self, new_bytes: &'b [u8]) -> Option<&'b [u8]> {
         let needed = self.length - self.read;
         let incoming = new_bytes.len();
 
@@ -30,9 +30,7 @@ impl Message {
             let (to_read, extra) = new_bytes.split_at(needed);
             self.bytes.write_all(to_read).unwrap();
             self.read += needed;
-            let mut extra_vec = Vec::with_capacity(extra.len());
-            extra_vec.write_all(extra).unwrap();
-            Some(extra_vec)
+            Some(extra)
         }
     }
 
@@ -75,7 +73,7 @@ mod test {
 
         let mut message = Message::new(total_length);
         let extra = message.read(with_extra.as_slice());
-        assert_eq!(extra.unwrap(), encoded);
+        assert_eq!(extra.unwrap(), encoded.as_slice());
         assert!(message.is_complete());
         assert_eq!(encoded, message.bytes);
 
