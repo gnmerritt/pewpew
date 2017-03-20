@@ -26,7 +26,7 @@ impl Board {
 
 #[cfg(test)]
 mod test {
-    use bincode::{serialize, deserialize, SizeLimit};
+    use bincode::{serialize, deserialize, Infinite};
     use super::*;
 
     #[test]
@@ -35,7 +35,7 @@ mod test {
         board.add_ship(1, Ship::at_origin());
         board.add_ship(2, Ship::at_origin());
 
-        let encoded: Vec<u8> = serialize(&board, SizeLimit::Infinite).unwrap();
+        let encoded: Vec<u8> = serialize(&board, Infinite).unwrap();
         assert_eq!(encoded.len(), 134);
 
         let decoded: Board = deserialize(&encoded[..]).unwrap();

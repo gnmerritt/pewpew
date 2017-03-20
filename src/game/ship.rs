@@ -20,7 +20,7 @@ impl Ship {
 #[cfg(test)]
 mod test {
     use na::{Vector3, Rotation3};
-    use bincode::{serialize, deserialize, SizeLimit};
+    use bincode::{serialize, deserialize, Infinite};
     use super::Ship;
 
     #[test]
@@ -30,7 +30,7 @@ mod test {
             orientation: Rotation3::identity(),
             velocity: Vector3::new(1.0, 0.0, 0.0),
         };
-        let encoded: Vec<u8> = serialize(&ship, SizeLimit::Infinite).unwrap();
+        let encoded: Vec<u8> = serialize(&ship, Infinite).unwrap();
 
         assert_eq!(encoded.len(), 60); // TODO: why is this 60 bytes?
 

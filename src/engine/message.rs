@@ -42,7 +42,7 @@ impl Message {
 
 #[cfg(test)]
 mod test {
-    use bincode::{serialize, deserialize, SizeLimit};
+    use bincode::{serialize, deserialize, Infinite};
     use super::Message;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -63,7 +63,7 @@ mod test {
     #[test]
     fn read_from_bytes() {
         let obj = TestObj { x: 15, y: 9.3 };
-        let encoded: Vec<u8> = serialize(&obj, SizeLimit::Infinite).expect("serialization failed");
+        let encoded: Vec<u8> = serialize(&obj, Infinite).expect("serialization failed");
         let total_length = encoded.len();
         assert_eq!(total_length, 8);
 
@@ -84,7 +84,7 @@ mod test {
     #[test]
     fn read_partial() {
         let obj = TestObj { x: 999, y: -9.3 };
-        let encoded: Vec<u8> = serialize(&obj, SizeLimit::Infinite).expect("serialization failed");
+        let encoded: Vec<u8> = serialize(&obj, Infinite).expect("serialization failed");
         let total_length = encoded.len();
         assert_eq!(total_length, 8);
 
