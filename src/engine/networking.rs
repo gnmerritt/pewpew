@@ -40,6 +40,7 @@ impl Server {
                     println!("Server got a client connection");
                     stream.set_read_timeout(None).expect("set read timeout failed");
                     stream.set_write_timeout(None).expect("write timeout failed");
+                    stream.set_nodelay(true).expect("disabling nagle's alg failed");
                     self.children.push(thread::spawn(move || {
                         handle_client(stream).unwrap();
                     }));
@@ -70,15 +71,16 @@ mod test {
         let mut client = connect();
         client = verify_echo(client, "some characters to send in");
 
-        let mut client2 = connect();
+        let client2 = connect();
         verify_echo(client2, "test string to client 2");
 
         verify_echo(client, "more things on client one");
     }
 
     fn connect() -> TcpStream {
-        let mut client = TcpStream::connect("127.0.0.1:8888").unwrap();
+        let client = TcpStream::connect("127.0.0.1:8888").unwrap();
         client.set_read_timeout(Some(Duration::from_secs(1))).expect("setting read timeout failed");
+        client.set_nodelay(true).expect("disabling nagle's alg failed");
         client
     }
 
