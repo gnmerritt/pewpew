@@ -10,5 +10,12 @@ extern crate nphysics3d;
 extern crate serde_derive;
 extern crate bincode;
 
+// Tokio network stack
+extern crate bytes;
+extern crate futures;
+extern crate tokio_io;
+extern crate tokio_proto;
+extern crate tokio_service;
+
 pub mod engine;
 pub mod game;
