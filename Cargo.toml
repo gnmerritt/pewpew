@@ -21,8 +21,8 @@ glutin = "0.7.4"
 nphysics3d = "0.6.0"
 serde = "0.9.11"
 serde_derive = "0.9.11"
+tokio-core = "0.1.6"
 tokio-io = "0.1"
-tokio-proto = "0.1"
 tokio-service = "0.1"
 
 [dependencies.nalgebra]

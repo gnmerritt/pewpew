@@ -1,6 +1,6 @@
 extern crate pewpew;
-use pewpew::engine::networking::Server;
+use pewpew::engine::networking;
 
 fn main() {
-    Server::listen(); // this blocks until the server is shut down
+    networking::launch_server(); // this blocks until the server is shut down
 }
