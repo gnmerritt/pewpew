@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use bincode::{serialize, Infinite};
 use game::ship::Ship;
 
 pub type PlayerId = u8;
@@ -21,12 +22,16 @@ impl Board {
     pub fn add_ship(&mut self, player: PlayerId, ship: Ship) {
         self.ships.insert(player, ship);
     }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        return serialize(self, Infinite).expect("Error serializing game board");
+    }
 }
 
 
 #[cfg(test)]
 mod test {
-    use bincode::{serialize, deserialize, Infinite};
+    use bincode::deserialize;
     use super::*;
 
     #[test]
@@ -35,7 +40,7 @@ mod test {
         board.add_ship(1, Ship::at_origin());
         board.add_ship(2, Ship::at_origin());
 
-        let encoded: Vec<u8> = serialize(&board, Infinite).unwrap();
+        let encoded: Vec<u8> = board.to_bytes();
         assert_eq!(encoded.len(), 134);
 
         let decoded: Board = deserialize(&encoded[..]).unwrap();
