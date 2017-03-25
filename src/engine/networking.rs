@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::str;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use futures;
 use futures::{Future};
@@ -13,8 +13,9 @@ use tokio_core::reactor::{Core, Interval};
 use tokio_io::io;
 use tokio_io::{AsyncRead};
 
+use engine::engine::Round;
 
-pub fn launch_server() {
+pub fn launch_server(round: Round) {
     let addr = "127.0.0.1:8888".parse().unwrap();
     println!("Started and listening on {}", addr);
     let mut core = Core::new().unwrap();
@@ -22,21 +23,20 @@ pub fn launch_server() {
     let socket = TcpListener::bind(&addr, &handle).unwrap();
 
     let connections = Rc::new(RefCell::new(HashMap::new()));
-
     let connections1 = connections.clone();
 
     let srv = socket.incoming().for_each(move |(stream, addr)| {
         println!("New Connection: {}", addr);
         let (_, writer) = stream.split();
 
-        let (tx, rx) = futures::sync::mpsc::unbounded::<String>();
+        let (tx, rx) = futures::sync::mpsc::unbounded::<Vec<u8>>();
         connections1.borrow_mut().insert(addr, tx);
 
         // TODO: read from connections too, close when they EOF
 
         let socket_writer = rx.fold(writer, |writer, msg| {
-            println!("Sending message: {}", msg);
-            let amt = io::write_all(writer, msg.into_bytes());
+            // TODO: let len = msg.len();
+            let amt = io::write_all(writer, msg);
             let amt = amt.map(|(writer, _)| writer);
             amt.map_err(|_| ())
         });
@@ -53,12 +53,11 @@ pub fn launch_server() {
 
     let handle = core.handle();
     let interval = Interval::new(Duration::from_millis(50), &handle).unwrap();
-    let start = Instant::now();
     let heartbeat = interval.for_each(move |_| {
-        println!("heartbeat fired after {:?}", start.elapsed());
-        for (addr, tx) in connections.borrow().deref() {
-            println!("had connection {} when heartbeat triggered", addr);
-            tx.send("heartbeat".to_string()).unwrap();
+        for (_, tx) in connections.borrow().deref() {
+            let board_bytes = round.board.to_bytes();
+            // TODO: let board_len = board_byes.len();
+            tx.send(board_bytes).unwrap();
         }
         futures::future::ok(())
     });
@@ -68,29 +67,35 @@ pub fn launch_server() {
 
 #[cfg(test)]
 mod test {
+    use std::io::{Read, Write};
     use std::thread;
     use std::net::TcpStream;
     use std::time::Duration;
-    use std::io::Read;
     use super::*;
+
+    use game::ship::Ship;
 
     #[test]
     fn test_echo_server() {
-        thread::spawn(|| { launch_server(); });
-        thread::sleep(Duration::from_millis(10));
+        let mut round = Round::new();
+        round.board.add_ship(1, Ship::at_origin());
+        round.board.add_ship(2, Ship::at_origin());
+        let board_bytes = round.board.to_bytes();
+        thread::spawn(|| { launch_server(round); });
 
+        thread::sleep(Duration::from_millis(10));
         let client = connect();
         let client2 = connect();
 
         // wait for the heartbeat to fire, verify both clients received it
         thread::sleep(Duration::from_millis(50));
-        verify_heartbeat(&client);
-        verify_heartbeat(&client2);
+        verify_heartbeat(&client, &board_bytes);
+        verify_heartbeat(&client2, &board_bytes);
 
         // Should receive a second one
         thread::sleep(Duration::from_millis(50));
-        verify_heartbeat(&client);
-        verify_heartbeat(&client2);
+        verify_heartbeat(&client, &board_bytes);
+        verify_heartbeat(&client2, &board_bytes);
     }
 
     fn connect() -> TcpStream {
@@ -100,15 +105,15 @@ mod test {
         client
     }
 
-    fn verify_heartbeat(mut client: &TcpStream) {
-        let heartbeat_str = "heartbeat";
+    fn verify_heartbeat(mut client: &TcpStream, expected: &Vec<u8>) {
         let mut buffer = [0; 512];
         let bytes_read = match client.read(&mut buffer) {
             Ok(read) => read,
             Err(e) => { println!("Got error reading {}", e); 0 }
         };
-        assert_eq!(bytes_read, heartbeat_str.len(), "wrong number of heartbeat bytes");
-        let parsed = String::from_utf8_lossy(&buffer[0 .. heartbeat_str.len()]);
-        assert_eq!(parsed.into_owned(), heartbeat_str);
+        assert_eq!(bytes_read, expected.len(), "wrong number of heartbeat bytes");
+        let mut read_vec = Vec::with_capacity(bytes_read);
+        read_vec.write_all(&buffer[..bytes_read]).expect("made vector");
+        assert_eq!(&read_vec, expected);
     }
 }
