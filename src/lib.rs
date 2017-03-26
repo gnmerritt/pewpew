@@ -4,7 +4,9 @@ extern crate gfx_window_glutin;
 extern crate glutin;
 
 extern crate nalgebra as na;
+extern crate ncollide;
 extern crate nphysics3d;
+extern crate time;
 
 #[macro_use]
 extern crate serde_derive;

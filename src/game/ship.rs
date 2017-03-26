@@ -1,4 +1,4 @@
-use na::{Vector3, Rotation3};
+use na::{Vector3, Rotation3, Translation3};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Ship {
@@ -14,6 +14,11 @@ impl Ship {
             orientation: Rotation3::identity(),
             velocity: Vector3::new(1.0, 0.0, 0.0),
         }
+    }
+
+    pub fn translation(&self) -> Translation3<f32> {
+        let pos = self.position;
+        Translation3::new(pos.x, pos.y, pos.z)
     }
 }
 

@@ -14,8 +14,9 @@ use tokio_io::io;
 use tokio_io::{AsyncRead};
 
 use engine::engine::Round;
+use game::board::Board;
 
-pub fn launch_server(round: Round) {
+pub fn launch_server(board: Board) {
     let addr = "127.0.0.1:8888".parse().unwrap();
     println!("Started and listening on {}", addr);
     let mut core = Core::new().unwrap();
@@ -55,7 +56,7 @@ pub fn launch_server(round: Round) {
     let interval = Interval::new(Duration::from_millis(50), &handle).unwrap();
     let heartbeat = interval.for_each(move |_| {
         for (_, tx) in connections.borrow().deref() {
-            let board_bytes = round.board.to_bytes();
+            let board_bytes = board.to_bytes();
             // TODO: let board_len = board_byes.len();
             tx.send(board_bytes).unwrap();
         }
@@ -81,7 +82,8 @@ mod test {
         round.board.add_ship(1, Ship::at_origin());
         round.board.add_ship(2, Ship::at_origin());
         let board_bytes = round.board.to_bytes();
-        thread::spawn(|| { launch_server(round); });
+        let board = round.board;
+        thread::spawn(|| { launch_server(board); });
 
         thread::sleep(Duration::from_millis(10));
         let client = connect();
