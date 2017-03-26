@@ -56,16 +56,16 @@ impl Round {
     /// Always steps the world ahead at 100fps, may make multiple steps per call
     pub fn tick(&mut self) -> u32 {
         let ticks = (self.dt_s() / TIMESTEP_S) as u32;
-        self.tick_ahead(ticks)
+        self.tick_ahead(ticks);
+        ticks
     }
 
-    fn tick_ahead(&mut self, ticks: u32) -> u32 {
+    fn tick_ahead(&mut self, ticks: u32) {
         for _ in 0..ticks  {
             self.world.step(TIMESTEP_S as f32);
         }
         self.last_tick += ticks as f64 * TIMESTEP_S;
         self.board.advance(ticks * TICKS_TO_MS);
-        ticks
     }
 
     fn dt_s(&self) -> f64 {

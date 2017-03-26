@@ -1,10 +1,12 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::io::Write;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::str;
 use std::time::Duration;
 
+use bytes::{ByteOrder, LittleEndian};
 use futures;
 use futures::{Future};
 use futures::stream::Stream;
@@ -56,13 +58,24 @@ pub fn launch_server(board: Board) {
     let heartbeat = interval.for_each(move |_| {
         for (_, tx) in connections.borrow().deref() {
             let board_bytes = board.to_bytes();
-            // TODO: let board_len = board_byes.len();
-            tx.send(board_bytes).unwrap();
+            let to_send = len_encode_bytes(board_bytes);
+            tx.send(to_send).unwrap();
         }
         futures::future::ok(())
     });
 
     core.run(srv.join(heartbeat)).unwrap();
+}
+
+/// Prepend a vec of bytes with it's length (4 bytes little endian)
+fn len_encode_bytes(mut to_write: Vec<u8>) -> Vec<u8> {
+    let len = to_write.len();
+    let mut len_buf = [0; 4];
+    LittleEndian::write_u32(&mut len_buf, len as u32);
+    let mut vec = Vec::with_capacity(4 + len);
+    vec.write_all(&len_buf).unwrap();
+    vec.append(&mut to_write);
+    vec
 }
 
 #[cfg(test)]
@@ -81,7 +94,7 @@ mod test {
         let mut round = Round::new();
         round.board.add_ship(1, Ship::at_origin());
         round.board.add_ship(2, Ship::at_origin());
-        let board_bytes = round.board.to_bytes();
+        let board_bytes = len_encode_bytes(round.board.to_bytes());
         let board = round.board;
         thread::spawn(|| { launch_server(board); });
 
