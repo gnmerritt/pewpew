@@ -13,7 +13,6 @@ use tokio_core::reactor::{Core, Interval};
 use tokio_io::io;
 use tokio_io::{AsyncRead};
 
-use engine::engine::Round;
 use game::board::Board;
 
 pub fn launch_server(board: Board) {
@@ -74,6 +73,7 @@ mod test {
     use std::time::Duration;
     use super::*;
 
+    use engine::engine::Round;
     use game::ship::Ship;
 
     #[test]

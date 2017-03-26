@@ -78,7 +78,7 @@ impl Round {
 mod test {
     use std::thread;
     use std::time::Duration;
-    use nphysics3d::math::{Point, Isometry};
+    use nphysics3d::math::Point;
     use super::*;
 
     #[test]

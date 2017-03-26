@@ -3,15 +3,15 @@ use std::io::Write;
 /**
  * A helper struct to aid in reading messages of a known length from a stream of bytes
  */
-pub struct Message {
+pub struct Frame {
     length: usize,
     read: usize,
     bytes: Vec<u8>,
 }
 
-impl Message {
-    pub fn new(length: usize) -> Message {
-        Message {
+impl Frame {
+    pub fn new(length: usize) -> Frame {
+        Frame {
             length: length,
             read: 0,
             bytes: Vec::with_capacity(length),
@@ -43,7 +43,7 @@ impl Message {
 #[cfg(test)]
 mod test {
     use bincode::{serialize, deserialize, Infinite};
-    use super::Message;
+    use super::Frame;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     struct TestObj {
@@ -53,7 +53,7 @@ mod test {
 
     #[test]
     fn empty_msg() {
-        let message = Message::new(35);
+        let message = Frame::new(35);
         assert_eq!(35, message.length);
         assert_eq!(0, message.read);
         assert!(message.bytes.is_empty());
@@ -71,7 +71,7 @@ mod test {
         with_extra.append(&mut encoded.clone());
         assert_eq!(with_extra.len(), 2 * encoded.len());
 
-        let mut message = Message::new(total_length);
+        let mut message = Frame::new(total_length);
         let extra = message.read(with_extra.as_slice());
         assert_eq!(extra.unwrap(), encoded.as_slice());
         assert!(message.is_complete());
@@ -91,7 +91,7 @@ mod test {
         let mut first = encoded.clone();
         let second = first.split_off(4);
 
-        let mut message = Message::new(total_length);
+        let mut message = Frame::new(total_length);
         let extra = message.read(first.as_slice());
         assert!(extra.is_none());
         assert!(!message.is_complete());
