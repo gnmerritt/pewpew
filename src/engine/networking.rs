@@ -68,7 +68,7 @@ pub fn launch_server(board: Board) {
 }
 
 /// Prepend a vec of bytes with it's length (4 bytes little endian)
-fn len_encode_bytes(mut to_write: Vec<u8>) -> Vec<u8> {
+pub fn len_encode_bytes(mut to_write: Vec<u8>) -> Vec<u8> {
     let len = to_write.len();
     let mut len_buf = [0; 4];
     LittleEndian::write_u32(&mut len_buf, len as u32);

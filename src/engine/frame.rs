@@ -34,8 +34,16 @@ impl Frame {
         }
     }
 
-    fn is_complete(&self) -> bool {
+    pub fn is_complete(&self) -> bool {
         self.length == self.read
+    }
+
+    pub fn bytes(&self) -> &Vec<u8> {
+        &self.bytes
+    }
+
+    pub fn len(&self) -> usize {
+        self.length
     }
 }
 
